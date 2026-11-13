@@ -2,12 +2,12 @@ import requests
 import os
 
 TOKEN = os.environ["TOKEN"]
-CHAT_ID = os.environ["CHAT_ID"]
+CHAT_ID = os.environ["CHATID"]
 BASE = "https://data-api.binance.vision"
 
 def send(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    requests.get(url, params={"chat_id": CHAT_ID, "text": text}, timeout=10)
+    requests.get(url, params={"chat_id": CHATID, "text": text}, timeout=10)
 
 def analyze(symbol):
     url = f"{BASE}/api/v3/klines?symbol={symbol}&interval=1h&limit=250"
