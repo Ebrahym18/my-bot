@@ -115,7 +115,7 @@ for coin in coins:
         active.append(res)
         msg += f"🪙 {res['symbol']}\n{res['type']}\n📍 ورود: {res['entry']:.4f}\n🛑 استاپ: {res['sl']:.4f}\n🎯 تیک پروفیت: {res['tp']:.4f}\n⚖️ RR: 1:2 | RSI: {res['rsi']:.1f}\n➖➖➖\n"
 if found:
-    send(msg)now_utc = datetime.utcnow()
+    send(msg) now_utc = datetime.utcnow()
 if now_utc.hour == 20:
     total = wins + losses
     winrate = (wins/total*100) if total>0 else 0
