@@ -1,7 +1,6 @@
 import os
 import requests
 import json
-from datetime import datetime
 TOKEN = os.getenv("BOTTOKEN")
 CHATID = os.getenv("CHATID")
 def send(text):
@@ -11,17 +10,7 @@ def get_price(symbol):
     url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
     return float(requests.get(url).json()['price'])
 def get_top_coins():
-    url = "https://api.binance.com/api/v3/ticker/24hr"
-    data = requests.get(url).json()
-    pairs = [d for d in data if d['symbol'].endswith('USDT') and 'UP' not in d['symbol'] and 'DOWN' not in d['symbol']]
-    sorted_coins = sorted(pairs, key=lambda x: abs(float(x['priceChangePercent'])), reverse=True)
-    top = ['BTCUSDT', 'ETHUSDT']
-    for c in sorted_coins:
-        if c['symbol'] not in top:
-            top.append(c['symbol'])
-        if len(top) >= 6:
-            break
-    return top
+    return ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'DOGEUSDT']
 def analyze(symbol):
     url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1h&limit=250"
     klines = requests.get(url).json()
