@@ -16,3 +16,10 @@ jobs:
         env:
           BOTTOKEN: ${{ secrets.BOTTOKEN }}
           CHATID: ${{ secrets.CHATID }}
+      - name: Save trades
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@bot.com"
+          git add trades.json || true
+          git commit -m "update trades" || true
+          git push || true
