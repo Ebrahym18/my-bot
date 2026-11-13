@@ -1,17 +1,15 @@
-import os, requests, json
+import os
+import requests
+import json
 from datetime import datetime
-
 TOKEN = os.getenv("BOTTOKEN")
 CHATID = os.getenv("CHATID")
-
 def send(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.get(url, params={"chat_id": CHATID, "text": text})
-
 def get_price(symbol):
     url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
     return float(requests.get(url).json()['price'])
-
 def get_top_coins():
     url = "https://api.binance.com/api/v3/ticker/24hr"
     data = requests.get(url).json()
@@ -24,7 +22,6 @@ def get_top_coins():
         if len(top) >= 6:
             break
     return top
-
 def analyze(symbol):
     url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1h&limit=250"
     klines = requests.get(url).json()
@@ -56,14 +53,13 @@ def analyze(symbol):
         entry = price
         sl = price-(atr*1.5)
         tp = price+((entry-sl)*2)
-        return {"symbol": symbol, "type": "LONG 🟢", "entry": entry, "sl": sl, "tp": tp, "rsi": rsi}
+        return {"symbol": symbol, "type": "LONG", "entry": entry, "sl": sl, "tp": tp, "rsi": rsi}
     if price < ema50 < ema200 and 35 < rsi < 70:
         entry = price
         sl = price+(atr*1.5)
         tp = price-((sl-entry)*2)
-        return {"symbol": symbol, "type": "SHORT 🔴", "entry": entry, "sl": sl, "tp": tp, "rsi": rsi}
+        return {"symbol": symbol, "type": "SHORT", "entry": entry, "sl": sl, "tp": tp, "rsi": rsi}
     return None
-
 active = []
 wins = 0
 losses = 0
@@ -75,7 +71,6 @@ if os.path.exists("trades.json"):
         wins = data.get("wins", 0)
         losses = data.get("losses", 0)
         history = data.get("history", [])
-
 new_active = []
 for trade in active:
     price = get_price(trade['symbol'])
@@ -93,18 +88,17 @@ for trade in active:
             hit_sl = True
     if hit_tp:
         wins += 1
-        history.append(f"✅ {trade['symbol']} تیپی زد 🎯")
-        send(f"🎯 تیپی خورد!\n🪙 {trade['symbol']} {trade['type']}\nورود: {trade['entry']:.4f}\nخروج: {price:.4f}\nسود: +2R ✅")
+        history.append("WIN " + trade['symbol'])
+        send("TP HIT " + trade['symbol'] + " WIN")
     elif hit_sl:
         losses += 1
-        history.append(f"❌ {trade['symbol']} استاپ خورد 🛑")
-        send(f"🛑 استاپ خورد!\n🪙 {trade['symbol']} {trade['type']}\nورود: {trade['entry']:.4f}\nخروج: {price:.4f}\nضرر: -1R ❌")
+        history.append("LOSS " + trade['symbol'])
+        send("SL HIT " + trade['symbol'] + " LOSS")
     else:
         new_active.append(trade)
 active = new_active
-
 coins = get_top_coins()
-msg = "📈 سیگنال‌های جدید (1 ساعته):\n\n"
+msg = "Signal (1h):\n\n"
 found = False
 for coin in coins:
     if any(t['symbol']==coin for t in active):
@@ -113,12 +107,8 @@ for coin in coins:
     if res:
         found = True
         active.append(res)
-        msg += f"🪙 {res['symbol']}\n{res['type']}\n📍 ورود: {res['entry']:.4f}\n🛑 استاپ: {res['sl']:.4f}\n🎯 تیک پروفیت: {res['tp']:.4f}\n⚖️ RR: 1:2 | RSI: {res['rsi']:.1f}\n➖➖➖\n"
+        msg += res['symbol'] + " " + res['type'] + " Entry:" + str(round(res['entry'],4)) + " SL:" + str(round(res['sl'],4)) + " TP:" + str(round(res['tp'],4)) + "\n"
 if found:
-    send(msg) now_utc = datetime.utcnow()
-ifnow_utc = datetime.utcnow()
-if now_utc.hour == 20:
-    total = wins + losses
-    winrate = (wins/total*100) if total>0 else 0
-    daily = f"📊 گزارش روزانه..."
-    send(daily)
+    send(msg)
+with open("trades.json","w") as f:
+    json.dump({"active": active, "wins": wins, "losses": losses, "history": history}, f)
