@@ -3,17 +3,22 @@ import requests
 import json
 TOKEN = os.getenv("BOTTOKEN")
 CHATID = os.getenv("CHATID")
+BASE = "https://data-api.binance.vision"
 def send(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     requests.get(url, params={"chat_id": CHATID, "text": text})
 def get_price(symbol):
-    url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+    url = BASE + f"/api/v3/ticker/price?symbol={symbol}"
     return float(requests.get(url).json()['price'])
 def get_top_coins():
     return ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT', 'DOGEUSDT']
 def analyze(symbol):
-    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1h&limit=250"
+    url = BASE + f"/api/v3/klines?symbol={symbol}&interval=1h&limit=250"
     klines = requests.get(url).json()
+    if not isinstance(klines, list):
+        return None
+    if len(klines) < 210:
+        return None
     closes = [float(k[4]) for k in klines]
     highs = [float(k[2]) for k in klines]
     lows = [float(k[3]) for k in klines]
