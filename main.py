@@ -83,16 +83,16 @@ for trade in active:
     if hit_tp:
         wins += 1
         history.append("WIN " + trade['symbol'])
-        send("TP HIT " + trade['symbol'] + " WIN")
+        send("✅ حد سود خورد " + trade['symbol'] + " - برد")
     elif hit_sl:
         losses += 1
         history.append("LOSS " + trade['symbol'])
-        send("SL HIT " + trade['symbol'] + " LOSS")
+        send("❌ حد ضرر خورد " + trade['symbol'] + " - باخت")
     else:
         new_active.append(trade)
 active = new_active
 coins = get_top_coins()
-msg = "Signal (1h):\n\n"
+msg = "📊 سیگنال جدید (تایم 1 ساعته):\n\n"
 found = False
 for coin in coins:
     if any(t['symbol']==coin for t in active):
@@ -101,7 +101,11 @@ for coin in coins:
     if res:
         found = True
         active.append(res)
-        msg += res['symbol'] + " " + res['type'] + " Entry:" + str(round(res['entry'],4)) + " SL:" + str(round(res['sl'],4)) + " TP:" + str(round(res['tp'],4)) + "\n"
+        if res['type'] == "LONG":
+            typ = "🟢 خرید (LONG)"
+        else:
+            typ = "🔴 فروش (SHORT)"
+        msg += "🪙 " + res['symbol'] + " " + typ + "\nورود: " + str(round(res['entry'],4)) + "\nحد ضرر: " + str(round(res['sl'],4)) + "\nحد سود: " + str(round(res['tp'],4)) + "\nRSI: " + str(round(res['rsi'],1)) + "\n\n"
 if found:
     send(msg)
 with open("trades.json","w") as f:
