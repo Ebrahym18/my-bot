@@ -1,10 +1,19 @@
-import os
-import requests
+if res:
+            found=True
+            active.append(res)
+            msg += f"🪙 {res['symbol']}\n{res['type']}\n📍 ورود: {res['entry']:.4f}\n🛑 استاپ: {res['sl']:.4f}\n🎯 تیک پروفیت: {res['tp']:.4f}\n⚖️ RR: 1:2 | RSI: {res['rsi']:.1f}\n➖➖➖\n"
+    except: pass
+if found:
+    send(msg)
 
-TOKEN = os.getenv("BOTTOKEN")
-CHATID = os.getenv("CHATID")
+# 3. گزارش آخر شب ساعت 23 به وقت ترکیه (20 به وقت UTC)
+now_utc = datetime.utcnow()
+if now_utc.hour == 20:
+    total = wins + losses
+    winrate = (wins/total*100) if total>0 else 0
+    daily = f"📊 گزارش روزانه\n\nکل معامله: {total}\n✅ برد: {wins}\n❌ باخت: {losses}\n🏆 وین ریت: {winrate:.1f}%\n\n" + ("\n".join(history) if history else "امروز معامله‌ای بسته نشد.")
+    send(daily)
 
-url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-data = {"chat_id": CHATID, "text": "سلام ابی! رباتت کار کرد ✅"}
-r = requests.get(url, params=data)
-print(r.text)
+# ذخیره کردن
+with open("trades.json","w") as f:
+    json.dump({"active": active, "wins": wins, "losses": losses, "history": history}, f)
